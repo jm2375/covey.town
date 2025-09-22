@@ -30,15 +30,14 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
       ['', '', ''],
     ];
     for (const move of moves) {
-      if (move.gamePiece !== '') {
-        board[move.row][move.col] = move.gamePiece;
-      }
+      board[move.row][move.col] = move.gamePiece;
     }
     return board;
   }
 
   private _checkForGameEnding() {
     const board = this._board;
+    const moves = this.state.moves.filter(move => move.gamePiece !== '');
     // A game ends when there are 3 in a row
     // Check for 3 in a row or column
     for (let i = 0; i < 3; i++) {
@@ -78,7 +77,7 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
       return;
     }
     // Check for no more moves
-    if (this.state.moves.length === 9) {
+    if (moves.length === 9) {
       this.state = {
         ...this.state,
         status: 'OVER',
@@ -90,7 +89,7 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
   private _validateMove(move: TicTacToeMove) {
     // A move is valid if the space is empty
     for (const m of this.state.moves) {
-      if (m.col === move.col && m.row === move.row) {
+      if (m.col === move.col && m.row === move.row && m.gamePiece !== '') {
         throw new InvalidParametersError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
       }
     }

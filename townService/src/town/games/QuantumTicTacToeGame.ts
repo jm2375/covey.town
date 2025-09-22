@@ -8,6 +8,7 @@ import Game from './Game';
 import TicTacToeGame from './TicTacToeGame';
 import Player from '../../lib/Player';
 import InvalidParametersError, {
+  BOARD_POSITION_NOT_EMPTY_MESSAGE,
   GAME_FULL_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
@@ -112,9 +113,47 @@ export default class QuantumTicTacToeGame extends Game<
       game.leave(player);
     });
 
-    // Quantum level checking that trickles up from sub level
-    this._checkForWins();
-    this._checkForGameEnding();
+    if (this.state.o === undefined) {
+      this.state = {
+        moves: [],
+        status: 'WAITING_TO_START',
+        xScore: 0,
+        oScore: 0,
+        publiclyVisible: {
+          A: [
+            [false, false, false],
+            [false, false, false],
+            [false, false, false],
+          ],
+          B: [
+            [false, false, false],
+            [false, false, false],
+            [false, false, false],
+          ],
+          C: [
+            [false, false, false],
+            [false, false, false],
+            [false, false, false],
+          ],
+        },
+      };
+      return;
+    }
+    if (this.state.x === player.id) {
+      this._checkForWins();
+      this.state = {
+        ...this.state,
+        status: 'OVER',
+        winner: this.state.o,
+      };
+    } else {
+      this._checkForWins();
+      this.state = {
+        ...this.state,
+        status: 'OVER',
+        winner: this.state.x,
+      };
+    }
   }
 
   public applyMove(move: GameMove<QuantumTicTacToeMove>): void {
@@ -163,7 +202,7 @@ export default class QuantumTicTacToeGame extends Game<
     } catch (error) {
       if (
         error instanceof InvalidParametersError &&
-        error.message.includes('BOARD_POSITION_NOT_EMPTY_MESSAGE')
+        error.message === BOARD_POSITION_NOT_EMPTY_MESSAGE
       ) {
         const subGameBoardState = subGameBoard._board;
 
