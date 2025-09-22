@@ -174,7 +174,7 @@ export default class QuantumTicTacToeGame extends Game<
     // Validate turn order at quantum level
     const isXTurn = this._moveCount % 2 === 0;
     const playerIsX = move.playerID === this.state.x;
-    
+
     if ((isXTurn && !playerIsX) || (!isXTurn && playerIsX)) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
