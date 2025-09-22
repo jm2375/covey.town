@@ -124,8 +124,45 @@ export default class QuantumTicTacToeAreaController extends GameAreaController<
   }
 
   protected _updateFrom(newModel: GameArea<QuantumTicTacToeGameState>): void {
+    const wasOurTurn = this.whoseTurn?.id === this._townController.ourPlayer.id;
     super._updateFrom(newModel);
-    // TODO: implement the rest of this
+    const newState = newModel.game;
+
+    if (newState) {
+      const newBoards: { A: TicTacToeCell[][]; B: TicTacToeCell[][]; C: TicTacToeCell[][] } = {
+        A: [
+          [undefined, undefined, undefined],
+          [undefined, undefined, undefined],
+          [undefined, undefined, undefined],
+        ],
+        B: [
+          [undefined, undefined, undefined],
+          [undefined, undefined, undefined],
+          [undefined, undefined, undefined],
+        ],
+        C: [
+          [undefined, undefined, undefined],
+          [undefined, undefined, undefined],
+          [undefined, undefined, undefined],
+        ],
+      };
+
+      newState.state.moves
+        .filter(move => move.gamePiece !== '')
+        .forEach(move => {
+          newBoards[move.board][move.row][move.col] = move.gamePiece as 'X' | 'O';
+        });
+
+      if (!_.isEqual(newBoards, this._boards)) {
+        this._boards = newBoards;
+        this.emit('boardChanged', this._boards);
+      }
+    }
+
+    const isOurTurn = this.whoseTurn?.id === this._townController.ourPlayer.id;
+    if (wasOurTurn !== isOurTurn) {
+      this.emit('turnChanged', isOurTurn);
+    }
   }
 
   public async makeMove(

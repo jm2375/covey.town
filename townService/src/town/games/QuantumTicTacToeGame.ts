@@ -10,6 +10,8 @@ import Player from '../../lib/Player';
 import InvalidParametersError, {
   BOARD_POSITION_NOT_EMPTY_MESSAGE,
   GAME_FULL_MESSAGE,
+  GAME_NOT_IN_PROGRESS_MESSAGE,
+  MOVE_NOT_YOUR_TURN_MESSAGE,
   PLAYER_ALREADY_IN_GAME_MESSAGE,
   PLAYER_NOT_IN_GAME_MESSAGE,
 } from '../../lib/InvalidParametersError';
@@ -157,14 +159,34 @@ export default class QuantumTicTacToeGame extends Game<
   }
 
   public applyMove(move: GameMove<QuantumTicTacToeMove>): void {
+    // Check if game is in progress at quantum level
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+
     const subGameBoard = this._games[move.move.board];
+
+    // Validate playable board
+    if (subGameBoard.state.status === 'OVER') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+
+    // Validate turn order at quantum level
+    const isXTurn = this._moveCount % 2 === 0;
+    const playerIsX = move.playerID === this.state.x;
+    
+    if ((isXTurn && !playerIsX) || (!isXTurn && playerIsX)) {
+      throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
+    }
+
+    const gamePiece: 'X' | 'O' = move.playerID === this.state.x ? 'X' : 'O';
 
     // Data expected by applyMove
     const subGameCompleteInfo = {
       gameID: subGameBoard.id,
       playerID: move.playerID,
       move: {
-        gamePiece: move.move.gamePiece,
+        gamePiece,
         row: move.move.row,
         col: move.move.col,
       },
@@ -181,7 +203,7 @@ export default class QuantumTicTacToeGame extends Game<
 
       const quantumGameMove = {
         board: move.move.board,
-        gamePiece: move.move.gamePiece,
+        gamePiece,
         row: move.move.row,
         col: move.move.col,
       };
@@ -205,8 +227,13 @@ export default class QuantumTicTacToeGame extends Game<
         error.message === BOARD_POSITION_NOT_EMPTY_MESSAGE
       ) {
         const subGameBoardState = subGameBoard._board;
+        const existingPiece = subGameBoardState[move.move.row][move.move.col];
 
-        if (subGameBoardState[move.move.row][move.move.col] !== move.move.gamePiece) {
+        if (existingPiece === gamePiece) {
+          throw new InvalidParametersError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
+        }
+
+        if (existingPiece !== gamePiece && existingPiece !== '') {
           const updatedPubliclyVisible = { ...this.state.publiclyVisible };
           updatedPubliclyVisible[move.move.board][move.move.row][move.move.col] = true;
 
