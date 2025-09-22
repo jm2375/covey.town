@@ -295,22 +295,10 @@ describe('QuantumTicTacToeGame', () => {
         });
 
         it('should throw an error if the move is on an occupied space', () => {
-          const board = 'A';
-          const row = 0;
-          const col = 0;
-          makeMove(player1, board, row, col);
-          expect(() =>
-            game.applyMove({
-              gameID: game.id,
-              playerID: player2.id,
-              move: {
-                board,
-                row,
-                col,
-                gamePiece: 'O',
-              },
-            }),
-          ).toThrowError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
+          makeMove(player1, 'A', 0, 0);
+          expect(() => {
+            makeMove(player2, 'A', 0, 0);
+          }).toThrowError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
         });
 
         it('should handle a collision by losing the second players turn', () => {
@@ -357,7 +345,7 @@ describe('QuantumTicTacToeGame', () => {
           makeMove(player2, 'B', 0, 0);
 
           expect(() => {
-            makeMove(player1, 'B', 0, 0);
+            makeMove(player1, 'A', 0, 0);
           }).toThrow(BOARD_POSITION_NOT_EMPTY_MESSAGE);
         });
       });
@@ -426,6 +414,7 @@ describe('QuantumTicTacToeGame', () => {
         makeMove(player1, 'A', 0, 2); // X wins board A
 
         expect(game.state.xScore).toBe(1);
+        expect(game.state.oScore).toBe(0);
 
         expect(() => {
           makeMove(player2, 'A', 1, 1);

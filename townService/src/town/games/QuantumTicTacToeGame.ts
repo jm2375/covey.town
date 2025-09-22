@@ -166,8 +166,8 @@ export default class QuantumTicTacToeGame extends Game<
 
     const subGameBoard = this._games[move.move.board];
 
-    // Validate playable board
-    if (subGameBoard.state.status === 'OVER') {
+    // Validate unplayable board
+    if (subGameBoard.state.status === 'OVER' && subGameBoard.state.winner !== undefined) {
       throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
     }
 
