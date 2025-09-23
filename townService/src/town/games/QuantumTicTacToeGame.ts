@@ -160,26 +160,42 @@ export default class QuantumTicTacToeGame extends Game<
     }
   }
 
-  public applyMove(move: GameMove<QuantumTicTacToeMove>): void {
-    // Check if game is in progress at quantum level
-    if (this.state.status !== 'IN_PROGRESS') {
-      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
-    }
-
+  private _validateMove(move: GameMove<QuantumTicTacToeMove>): void {
     const subGameBoard = this._games[move.move.board];
 
-    // Validate unplayable board
-    if (subGameBoard.state.status === 'OVER' && subGameBoard.state.winner !== undefined) {
-      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    // Check if Sub level piece is the same as player's own
+    for (const m of subGameBoard.state.moves) {
+      if (
+        m.col === move.move.col &&
+        m.row === move.move.row &&
+        m.gamePiece === move.move.gamePiece
+      ) {
+        throw new InvalidParametersError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
+      }
     }
 
-    // Validate turn order at quantum level
+    // Validate turn order at Quantum level
     const playerIsX = move.playerID === this.state.x;
 
     if ((this._xTurn && !playerIsX) || (!this._xTurn && playerIsX)) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
 
+    // Check if game is in progress at Quantum level
+    if (this.state.status !== 'IN_PROGRESS') {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+
+    // Validate unplayable board at Sub level
+    if (subGameBoard.state.status === 'OVER' && subGameBoard.state.winner !== undefined) {
+      throw new InvalidParametersError(GAME_NOT_IN_PROGRESS_MESSAGE);
+    }
+  }
+
+  public applyMove(move: GameMove<QuantumTicTacToeMove>): void {
+    this._validateMove(move);
+
+    const subGameBoard = this._games[move.move.board];
     const gamePiece: 'X' | 'O' = move.playerID === this.state.x ? 'X' : 'O';
 
     const quantumGameMove = {
