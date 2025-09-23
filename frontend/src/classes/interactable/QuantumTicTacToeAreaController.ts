@@ -147,16 +147,14 @@ export default class QuantumTicTacToeAreaController extends GameAreaController<
         ],
       };
 
-      newState.state.moves
-        .filter(move => move.gamePiece !== '')
-        .forEach(move => {
-          if (
-            this.gamePiece === move.gamePiece ||
-            newState.state.publiclyVisible[move.board][move.row][move.col] === true
-          ) {
-            newBoards[move.board][move.row][move.col] = move.gamePiece as 'X' | 'O';
-          }
-        });
+      newState.state.moves.forEach(move => {
+        if (
+          this.gamePiece === move.gamePiece ||
+          newState.state.publiclyVisible[move.board][move.row][move.col] === true
+        ) {
+          newBoards[move.board][move.row][move.col] = move.gamePiece as 'X' | 'O';
+        }
+      });
 
       if (!_.isEqual(newBoards, this._boards)) {
         this._boards = newBoards;

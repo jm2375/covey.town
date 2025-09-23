@@ -15,11 +15,15 @@ import Game from './Game';
  * @see https://en.wikipedia.org/wiki/Tic-tac-toe
  */
 export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMove> {
+  public _xTurn: boolean;
+
   public constructor() {
     super({
       moves: [],
       status: 'WAITING_TO_START',
     });
+
+    this._xTurn = true;
   }
 
   public get _board() {
@@ -30,16 +34,13 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
       ['', '', ''],
     ];
     for (const move of moves) {
-      if (move.gamePiece !== '') {
-        board[move.row][move.col] = move.gamePiece;
-      }
+      board[move.row][move.col] = move.gamePiece;
     }
     return board;
   }
 
   private _checkForGameEnding() {
     const board = this._board;
-    const moves = this.state.moves.filter(move => move.gamePiece !== '');
     // A game ends when there are 3 in a row
     // Check for 3 in a row or column
     for (let i = 0; i < 3; i++) {
@@ -79,7 +80,7 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
       return;
     }
     // Check for no more moves
-    if (moves.length === 9) {
+    if (this.state.moves.length === 9) {
       this.state = {
         ...this.state,
         status: 'OVER',
@@ -91,15 +92,15 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
   private _validateMove(move: TicTacToeMove) {
     // A move is valid if the space is empty
     for (const m of this.state.moves) {
-      if (m.col === move.col && m.row === move.row && m.gamePiece !== '') {
+      if (m.col === move.col && m.row === move.row) {
         throw new InvalidParametersError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
       }
     }
 
     // A move is only valid if it is the player's turn
-    if (move.gamePiece === 'X' && this.state.moves.length % 2 === 1) {
+    if (move.gamePiece === 'X' && !this._xTurn) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
-    } else if (move.gamePiece === 'O' && this.state.moves.length % 2 === 0) {
+    } else if (move.gamePiece === 'O' && this._xTurn) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
     // A move is valid only if game is in progress
@@ -113,6 +114,7 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
       ...this.state,
       moves: [...this.state.moves, move],
     };
+    this._xTurn = !this._xTurn;
     this._checkForGameEnding();
   }
 

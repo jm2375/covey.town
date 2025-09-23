@@ -2,7 +2,6 @@ import {
   GameMove,
   QuantumTicTacToeGameState,
   QuantumTicTacToeMove,
-  TicTacToeGridPosition,
 } from '../../types/CoveyTownSocket';
 import Game from './Game';
 import TicTacToeGame from './TicTacToeGame';
@@ -26,6 +25,8 @@ export default class QuantumTicTacToeGame extends Game<
   QuantumTicTacToeMove
 > {
   private _games: { A: TicTacToeGame; B: TicTacToeGame; C: TicTacToeGame };
+
+  private _xTurn: boolean;
 
   private _xScore: number;
 
@@ -64,6 +65,7 @@ export default class QuantumTicTacToeGame extends Game<
       C: new TicTacToeGame(),
     };
 
+    this._xTurn = true;
     this._xScore = 0;
     this._oScore = 0;
     this._moveCount = 0;
@@ -172,10 +174,9 @@ export default class QuantumTicTacToeGame extends Game<
     }
 
     // Validate turn order at quantum level
-    const isXTurn = this._moveCount % 2 === 0;
     const playerIsX = move.playerID === this.state.x;
 
-    if ((isXTurn && !playerIsX) || (!isXTurn && playerIsX)) {
+    if ((this._xTurn && !playerIsX) || (!this._xTurn && playerIsX)) {
       throw new InvalidParametersError(MOVE_NOT_YOUR_TURN_MESSAGE);
     }
 
@@ -192,11 +193,7 @@ export default class QuantumTicTacToeGame extends Game<
       },
     };
 
-    const dummySubGameMove = {
-      gamePiece: '' as 'X' | 'O' | '',
-      row: 2 as TicTacToeGridPosition,
-      col: 2 as TicTacToeGridPosition,
-    };
+    subGameBoard._xTurn = this._xTurn;
 
     try {
       subGameBoard.applyMove(subGameCompleteInfo);
@@ -212,15 +209,9 @@ export default class QuantumTicTacToeGame extends Game<
         ...this.state,
         moves: [...this.state.moves, quantumGameMove],
       };
-
       this._moveCount++;
 
-      // Add in dummy move from valid player to sync turn order
-      Object.values(this._games).forEach(game => {
-        if (game.state.moves.length !== this._moveCount) {
-          game.state.moves = [...game.state.moves, dummySubGameMove];
-        }
-      });
+      this._xTurn = !this._xTurn;
     } catch (error) {
       if (
         error instanceof InvalidParametersError &&
@@ -229,7 +220,7 @@ export default class QuantumTicTacToeGame extends Game<
         const subGameBoardState = subGameBoard._board;
         const existingPiece = subGameBoardState[move.move.row][move.move.col];
 
-        if (existingPiece !== gamePiece && existingPiece !== '') {
+        if (existingPiece !== gamePiece) {
           const updatedPubliclyVisible = { ...this.state.publiclyVisible };
           updatedPubliclyVisible[move.move.board][move.move.row][move.move.col] = true;
 
@@ -238,14 +229,7 @@ export default class QuantumTicTacToeGame extends Game<
             publiclyVisible: updatedPubliclyVisible,
           };
 
-          this._moveCount++;
-
-          // Add in dummy move from valid player to sync turn order
-          Object.values(this._games).forEach(game => {
-            if (game.state.moves.length !== this._moveCount) {
-              game.state.moves = [...game.state.moves, dummySubGameMove];
-            }
-          });
+          this._xTurn = !this._xTurn;
         }
       }
 

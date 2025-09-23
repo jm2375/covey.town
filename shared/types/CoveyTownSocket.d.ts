@@ -104,7 +104,7 @@ export type TicTacToeGridPosition = 0 | 1 | 2;
  * Type for a move in TicTacToe
  */
 export interface TicTacToeMove {
-  gamePiece: 'X' | 'O' | '';
+  gamePiece: 'X' | 'O';
   row: TicTacToeGridPosition;
   col: TicTacToeGridPosition;
 }
