@@ -30,7 +30,9 @@ export default class TicTacToeGame extends Game<TicTacToeGameState, TicTacToeMov
       ['', '', ''],
     ];
     for (const move of moves) {
-      board[move.row][move.col] = move.gamePiece;
+      if (move.gamePiece !== '') {
+        board[move.row][move.col] = move.gamePiece;
+      }
     }
     return board;
   }

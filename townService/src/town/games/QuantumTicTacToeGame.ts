@@ -229,10 +229,6 @@ export default class QuantumTicTacToeGame extends Game<
         const subGameBoardState = subGameBoard._board;
         const existingPiece = subGameBoardState[move.move.row][move.move.col];
 
-        if (existingPiece === gamePiece) {
-          throw new InvalidParametersError(BOARD_POSITION_NOT_EMPTY_MESSAGE);
-        }
-
         if (existingPiece !== gamePiece && existingPiece !== '') {
           const updatedPubliclyVisible = { ...this.state.publiclyVisible };
           updatedPubliclyVisible[move.move.board][move.move.row][move.move.col] = true;
