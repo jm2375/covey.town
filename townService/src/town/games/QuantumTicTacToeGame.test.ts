@@ -61,6 +61,32 @@ describe('QuantumTicTacToeGame', () => {
       expect(game.state.moves.length).toBe(1);
     });
 
+    it('should throw an error if a player tries to play on their own piece', () => {
+      makeMove(player1, 'A', 0, 0);
+      makeMove(player2, 'B', 0, 0);
+      expect(() => makeMove(player1, 'A', 0, 0)).toThrow();
+      // @ts-expect-error - private property
+      expect(game._games.A._board[0][0]).toBe('X');
+      expect(game.state.moves.length).toBe(3);
+    });
+
+    it('should handle a collision by losing the second players turn', () => {
+      makeMove(player1, 'A', 0, 0);
+      expect(() => makeMove(player2, 'A', 0, 0)).toThrow();
+      // @ts-expect-error - private property
+      expect(game._games.A._board[0][0]).toBe('X');
+      expect(game.state.moves.length).toBe(2);
+    });
+
+    it('should throw an error if a player tries to play on their own piece', () => {
+      makeMove(player1, 'A', 0, 0);
+      makeMove(player2, 'B', 0, 0);
+      expect(() => makeMove(player1, 'A', 0, 0)).toThrow();
+      // @ts-expect-error - private property
+      expect(game._games.A._board[0][0]).toBe('X');
+      expect(game.state.moves.length).toBe(3);
+    });
+
     describe('scoring and game end', () => {
       it('should award a point when a player gets three-in-a-row', () => {
         // X gets a win on board A

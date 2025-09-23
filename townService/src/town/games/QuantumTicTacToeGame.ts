@@ -182,6 +182,13 @@ export default class QuantumTicTacToeGame extends Game<
 
     const gamePiece: 'X' | 'O' = move.playerID === this.state.x ? 'X' : 'O';
 
+    const quantumGameMove = {
+      board: move.move.board,
+      gamePiece,
+      row: move.move.row,
+      col: move.move.col,
+    };
+
     // Data expected by applyMove
     const subGameCompleteInfo = {
       gameID: subGameBoard.id,
@@ -194,22 +201,14 @@ export default class QuantumTicTacToeGame extends Game<
     };
 
     subGameBoard._xTurn = this._xTurn;
+    this.state = {
+      ...this.state,
+      moves: [...this.state.moves, quantumGameMove],
+    };
+    this._moveCount++;
 
     try {
       subGameBoard.applyMove(subGameCompleteInfo);
-
-      const quantumGameMove = {
-        board: move.move.board,
-        gamePiece,
-        row: move.move.row,
-        col: move.move.col,
-      };
-
-      this.state = {
-        ...this.state,
-        moves: [...this.state.moves, quantumGameMove],
-      };
-      this._moveCount++;
 
       this._xTurn = !this._xTurn;
     } catch (error) {
@@ -217,20 +216,15 @@ export default class QuantumTicTacToeGame extends Game<
         error instanceof InvalidParametersError &&
         error.message === BOARD_POSITION_NOT_EMPTY_MESSAGE
       ) {
-        const subGameBoardState = subGameBoard._board;
-        const existingPiece = subGameBoardState[move.move.row][move.move.col];
+        const updatedPubliclyVisible = { ...this.state.publiclyVisible };
+        updatedPubliclyVisible[move.move.board][move.move.row][move.move.col] = true;
 
-        if (existingPiece !== gamePiece) {
-          const updatedPubliclyVisible = { ...this.state.publiclyVisible };
-          updatedPubliclyVisible[move.move.board][move.move.row][move.move.col] = true;
+        this.state = {
+          ...this.state,
+          publiclyVisible: updatedPubliclyVisible,
+        };
 
-          this.state = {
-            ...this.state,
-            publiclyVisible: updatedPubliclyVisible,
-          };
-
-          this._xTurn = !this._xTurn;
-        }
+        this._xTurn = !this._xTurn;
       }
 
       // Throw Sub level errors at Quantum level
