@@ -1,9 +1,8 @@
 import assert from 'assert';
-import { generateKey } from 'crypto';
 import EventEmitter from 'events';
 import _ from 'lodash';
 import { nanoid } from 'nanoid';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import TypedEmitter from 'typed-emitter';
 import Interactable from '../components/Town/Interactable';
@@ -226,7 +225,7 @@ export default class TownController extends (EventEmitter as new () => TypedEmit
 
     const url = process.env.NEXT_PUBLIC_TOWNS_SERVICE_URL;
     assert(url);
-    this._socket = io(url, { auth: { userName, townID } });
+    this._socket = io(url, { auth: { userName, townID }, transports: ['websocket', 'polling'] });
     this._townsService = new TownsServiceClient({ BASE: url }).towns;
     this.registerSocketListeners();
   }

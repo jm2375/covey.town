@@ -18,7 +18,6 @@ app.use(CORS());
 const server = http.createServer(app);
 const socketServer = new SocketServer<ClientToServerEvents, ServerToClientEvents>(server, {
   cors: { origin: '*' },
-  transports: ['websocket', 'polling'],
 });
 
 // Initialize the towns store with a factory that creates a broadcast emitter for a town
